@@ -11,7 +11,7 @@ const upload = multer({ storage : multer.memoryStorage()})
 const router = express.Router();
 
 
-router.post("/get-user-info/:id",getUserInfo);
+router.get("/user-info/:id",getUserInfo);
 router.post("/update-profile/:id", upload.single("image") ,updateProfilePicture);
 
 

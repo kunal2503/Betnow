@@ -2,13 +2,13 @@ import React, { useState } from 'react'
 import { MdClose } from 'react-icons/md'
 import axiosInstance from '../../utils/axiosInstance'
 import { Navigate } from 'react-router'
+import { useUser } from '../context/UserProvider'
 
 const AddEvents = ({setOpenAddEvent}) => {
-    const user = JSON.parse(localStorage.getItem('user'))
+    const {user} = useUser()
     const [event, setEvent] = useState({
         question : "",
         category : "",
-        description : "",
         createdBy : user.id
     })
 
@@ -36,10 +36,6 @@ const AddEvents = ({setOpenAddEvent}) => {
         <div className='flex flex-col'>
             <label htmlFor="question" className='font-light text-sm'>Questions</label>
             <input type="text" id='question'  onChange={handelChanges} value={event.question} name='question' placeholder='Enter a Questions' className='border px-6 border-gray-500 focus:outline-none focus:border-2 focus:border-black rounded-sm py-2'/>
-        </div>
-        <div className='flex flex-col'>
-            <label htmlFor="description" className='font-light text-sm'>Description</label>
-            <input type="text" id='description'  onChange={handelChanges} value={event.description} name='description' placeholder='Enter a Questions' className='border px-6 border-gray-500 focus:outline-none focus:border-2 focus:border-black rounded-sm py-2'/>
         </div>
          <div className='flex flex-col'>
             <label htmlFor="category" className='font-light text-sm'>Category</label>

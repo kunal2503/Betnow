@@ -1,8 +1,11 @@
 const express = require("express");
-const {setBet} = require("../controllers/betControllers")
+const { placeBet,getBet, sellBet} = require("../controllers/betControllers");
+
 
 const router =  express.Router();
 
-router.post("/:eventId",setBet);
+router.get("/get-bet-orders/:userId",getBet);
+router.post("/place-bet",placeBet);
+router.post("/sell-bet/:betId",sellBet);
 
 module.exports = router;

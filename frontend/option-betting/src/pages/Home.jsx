@@ -4,24 +4,13 @@ import { MdAdd } from "react-icons/md";
 import AddEvents from "../components/AddEvents";
 import axiosInstance from "../../utils/axiosInstance";
 import AdminBettingCard from "../components/AdminBettingCard";
+import { useUser } from "../context/UserProvider";
 
 const Home = () => {
   const [openAddEvent, setOpenAddEvent] = useState(false);
   const [event, setEvent] = useState([]);
 
-  const [user, setUser] = useState({});
-  const userId = JSON.parse(localStorage.getItem("user"));
-
-  const userInfo = async () => {
-    try {
-      const response = await axiosInstance.post(
-        `/api/profile/get-user-info/${userId.id}`
-      );
-      setUser(response.data.user);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const {user} = useUser()
 
   const eventData = async () => {
     try {
@@ -33,17 +22,15 @@ const Home = () => {
   };
 
   useEffect(() => {
-    userInfo();
     eventData();
   }, []);
-
   return (
     <div className="flex flex-col items-center justify-center gap-5 m-10">
       {event.map((eventItem) => (
         user.role === "admin" ? (
-          <AdminBettingCard event={eventItem}/>
+          <AdminBettingCard key={eventItem._id} event={eventItem}/>
         ) : (
-          <UserBettingCard event={eventItem} userId={user._id} />
+          <UserBettingCard key={eventItem._id} event={eventItem} userId={user._id} />
         )
       ))}
 

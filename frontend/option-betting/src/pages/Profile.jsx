@@ -11,29 +11,23 @@ const Profile = () => {
   const params = useParams();
 
   const handleLogout = () => {
+    <Navigate to={"/login"}/>
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    setUser(null);
   }
 
-  // if (!user) {
-  //   return <Navigate to="/login" />
-  // }
-// console.log(user);
 const userInfo = async() =>{
   try{
-    const response = await axiosInstance.post(`/api/profile/get-user-info/${params.id}`) 
+    const response = await axiosInstance.get(`/api/profile/user-info/${params.id}`) 
     setUser(response.data.user);
-    // localStorage.setItem("profileImage", JSON.stringify(response.data.user.profileImage));
-    // console.log(response.data.user)
   } catch(error){
       console.log(error)
   }
 }
 
-useEffect(() =>{
+useEffect(() =>{                                                                                                                                                                                                   
   userInfo();
-},[user])
+},[])
 
   return (
     <div className="bg-gray-50 min-h-screen flex items-center justify-center px-4 py-10">
@@ -53,36 +47,29 @@ useEffect(() =>{
         </div>
 
         {/* Balance Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { title: "Available Balance", amount: "$10000" },
-            { title: "Use Balance", amount: "$700" },
-            { title: "Withdraw", amount: "$0.00" },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="bg-gray-100 border rounded-lg shadow-sm p-4 text-center hover:shadow-md transition"
-            >
-              <h2 className="text-sm font-medium text-gray-600">{item.title}</h2>
-              <span className="text-2xl font-bold text-gray-900">{item.amount}</span>
-            </div>
-          ))}
-        </div>
-          
-        {openEditPreview ? <AddProfile userId={user._id} setOpenEditPreview={setOpenEditPreview} /> : null}
-
-        {/* Withdraw / Deposit */}
-        <div className="flex gap-4 justify-center">
+        <div className="flex justify-center items-center gap-4">
+            <div className="bg-gray-50 rounded p-3 text-center">
+      <span className="block text-gray-500 text-xs">Available Balance</span>
+      <span className="font-semibold text-green-600">₹{user.wallet?.toFixed(2)}</span>
+    </div>  
+            <div className="flex gap-4 justify-center">
           <button className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
             Withdraw
-          </button>
+          </button> 
           <button className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
             Deposit
           </button>
         </div>
+        </div>
+
+          
+        {openEditPreview ? <AddProfile userId={user._id} setOpenEditPreview={setOpenEditPreview} /> : null}
+
+        {/* Withdraw / Deposit */}
+        
 
         {/* Navigation Links */}
-        <div className="space-y-3 text-lg text-center">
+        <div className="space-y-3 text-lg flex items-center flex-col ">
           <Link to="/personal-info" className="block hover:text-blue-600 transition">
             Personal Information
           </Link>

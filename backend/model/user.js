@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
     },
     wallet : {
         type : Number,
-        default : 0
+        default : 1000
     },
     createdAt : {
         type : Date,

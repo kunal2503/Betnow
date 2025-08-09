@@ -1,15 +1,28 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import axiosInstance from '../../utils/axiosInstance';
+import BetOrders from '../components/BetOrders';
+import { useUser } from '../context/UserProvider';
 
 const Orders = () => {
-  const [orders,setOrders] = useState("");
-  return (
-    <div className=' flex items-center justify-center'>
-      {orders ? (
-        <div>
+  const {user} = useUser();
+  const [orders,setOrders] = useState([]);
 
-        </div>
-      )
-       : <p>No orders yet</p>}
+  const getOrersData = async () => {
+    try{
+      const response  = await axiosInstance.get(`/api/bet/get-bet-orders/${user._id}`);
+      setOrders(response.data.orders)
+    } catch(error){
+        console.log(error)
+      }
+  }
+
+  useEffect(()=>{
+      getOrersData()
+    },[])
+  console.log(orders)
+    return (
+    <div className='flex flex-col justify-center w-full m-10'>
+      <BetOrders orders={orders}/> 
     </div>
   )
 }

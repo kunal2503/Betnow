@@ -6,10 +6,15 @@ import Home from '../pages/Home'
 import History from '../pages/History'
 import Profile from '../pages/Profile'
 import Orders from '../pages/Orders'
+import ProtectRoute from '../components/ProtectRoute'
 
 const MainLayout = () => {
   return (
     <div className='flex flex-col min-h-screen scroll-smooth '>
+
+      <ProtectRoute>
+
+
         <Navbar/>
         <div className='flex-grow'>
         <Routes>
@@ -20,6 +25,7 @@ const MainLayout = () => {
         </Routes>
         </div>
         <Footer/>
+      </ProtectRoute>
     </div>
   )
 }

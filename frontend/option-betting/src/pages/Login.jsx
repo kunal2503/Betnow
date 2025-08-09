@@ -2,6 +2,7 @@ import React from 'react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import axiosInstance from '../../utils/axiosInstance';
+import toast from 'react-hot-toast';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -20,9 +21,10 @@ const Login = () => {
             const response = await axiosInstance.post("/api/auth/login",formData);
             localStorage.setItem("user",JSON.stringify(response?.data?.user))
             localStorage.setItem("token",JSON.stringify(response?.data?.token))
-            console.log(response.data.user);
+            toast.success("Login successfully")
             navigate("/")
         }catch(error){
+            toast.error(error.response?.data?.message || "Login failed")
             console.log(error);
         }
     }

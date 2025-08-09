@@ -5,14 +5,13 @@ const eventSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
+      trim : true
     },
     category: {
       type: String,
       required: true,
-    },
-    description : {
-        type : String,
-        default : ""
+      trim: true,
+      lowerCase : true
     },
     startTime: {
       type: Date,
@@ -23,32 +22,43 @@ const eventSchema = new mongoose.Schema(
     status: {
       type: String,
       default: "live",
-      enum: ["live", "completed", "cancelled", "result_declared"],
+      enum: ["live", "completed", "cancelled",],
+      lowerCase : true
     },
-    result: {
-      type: String,
-      default: "pending",
-      enum: ["pending", "yes", "no", "cancelled"],
-    },
-    totalYesAmount: {
+   totalYesAmount: {
       type: Number,
       default: 0,
+      min : 0
     },
-    totalNoAmount: {
+   totalNoAmount: {
       type: Number,
       default: 0,
+      min : 0
+    },
+    totalNoQuantity: {
+      type: Number,
+      default: 0,
+      min : 0
+    },
+    totalYesQuantity: {
+      type: Number,
+      default: 0,
+      min : 0
     },
     yesPrice: {
         type: Number,
-        default : 5
+        default : 5,
+        min : 0.5
     },
     noPrice: {
         type: Number,
-        default : 5
+        default : 5,
+        min : 0.5
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref : "user"
     },
   },
   { timestamps: true }

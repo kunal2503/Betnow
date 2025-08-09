@@ -5,11 +5,13 @@ import Signup from './pages/Signup'
 import ForgetPassword from './pages/ForgetPassword'
 import MainLayout from './layouts/MainLayout'
 import ResetPassword from './pages/ResetPassword'
+import { Toaster } from "react-hot-toast"
 
 const App = () => {
   return (
     <>
     
+    <Toaster position='top-center'/>
     <BrowserRouter>
     <Routes>
       <Route path='/login' element={<Login/>}/>

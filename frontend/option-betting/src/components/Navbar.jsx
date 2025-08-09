@@ -9,10 +9,11 @@ import { FaHistory, FaCartPlus } from 'react-icons/fa';
 import { GiHamburgerMenu } from 'react-icons/gi';
 import { RxCross2 } from 'react-icons/rx';
 import { Link, useNavigate } from 'react-router'; // ✅ Use react-router-dom
+import { useUser } from '../context/UserProvider';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const user = JSON.parse(localStorage.getItem('user')) ;
+  const {user} = useUser();
   const profileImage = JSON.parse(localStorage.getItem('profileImage'));
   const navigate = useNavigate();
 
@@ -27,7 +28,6 @@ const Navbar = () => {
     navigate('/');
 
   };
-  console.log(user);
 
   return (
     <div className="sticky top-0 z-50 bg-white shadow-sm border border-gray-100 px-6 py-4 rounded-lg mx-4 mt-4 flex justify-between items-center">
@@ -38,10 +38,10 @@ const Navbar = () => {
 
       {/* Desktop Nav */}
       <div className="hidden md:flex items-center gap-6 text-lg font-semibold">
-        <Link to="/" className="hover:text-cyan-700 px-4 py-2 rounded-full transition">Home</Link>
+        <Link to="/" className="hover:text-cyan-700 px-4 py-2 rounded-full transition ">Home</Link>
         <Link to="/orders" className="hover:text-cyan-700 px-4 py-2 rounded-full transition">Orders</Link>
         <Link to="/history" className="hover:text-cyan-700 px-4 py-2 rounded-full transition">History</Link>
-        <Link to={`/profile/${user.id}`} >
+        <Link to={`/profile/${user?._id}`} >
         {profileImage ? (<img src={user.profileImage} alt="Profile" className="w-8 h-8 rounded-full object-cover" /> ) : (<CgProfile className="w-8 h-8" />)
         }
         </Link>
@@ -76,7 +76,7 @@ const Navbar = () => {
               </Link>
             </li>
             <li className="hover:bg-gray-100 px-6 py-3">
-              <Link to={`/profile/${user.id}`} onClick={handleClickOnLink} className="flex items-center justify-center gap-2">
+              <Link to={`/profile/${user._id}`} onClick={handleClickOnLink} className="flex items-center justify-center gap-2">
                 <CgProfile /> Profile
               </Link>
             </li>
