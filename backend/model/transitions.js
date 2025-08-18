@@ -9,12 +9,11 @@ const transitionSchema = new mongoose.Schema({
     betId : {
         type : mongoose.Schema.Types.ObjectId,
         ref : "bet",
-        required : true
     },
     type : {
         type : String,
         required : true,
-        enum: ["credit","deposit"]
+        enum: ["credit","deposit","refund","internalCredit", "internalDebit"]
     },
     amount : {
         type : Number,
@@ -24,7 +23,8 @@ const transitionSchema = new mongoose.Schema({
     status : {
         type : String,
         required : true,
-        enum : ["pending", "successfull", "failed", "cancelled" ]
+        enum : ["pending", "successfull", "failed" ],
+        default :  "pending"
     },
     createdAt : {
         type : Date,

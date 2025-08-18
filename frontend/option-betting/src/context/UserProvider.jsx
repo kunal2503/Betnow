@@ -13,23 +13,22 @@ export const UserProvider = ({ children }) => {
   const getUserInfo = async()=>{
     try{
       const response = await axiosInstance.get(`/api/profile/user-info/${userId.id}`)  
-      console.log(response.data.user)
-      setUser(response.data.user);
+      setUser(response?.data?.user);
     } catch(error){
       toast.error(error.response.data.message)
     }
   }
-  console.log(user)
   useEffect(() => {
     getUserInfo()
-    const loaclToken = JSON.parse(localStorage.getItem("token"));
+    const loaclToken = localStorage.getItem("token");
+    console.log(loaclToken)
     if (loaclToken ) {
     setToken(loaclToken)
     }
   }, []);
 
   return (
-    <UserContext.Provider value={{ user,token,setUser,setToken}}>
+    <UserContext.Provider value={{ user,token}}>
       {children}
     </UserContext.Provider>
   );

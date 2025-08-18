@@ -8,6 +8,7 @@ const otpRoutes = require("./routes/otpRoutes");
 const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/evenRoutes");
 const betRoutes = require("./routes/betRoutes");
+const transitionsRoutes = require("./routes/transitionsRoutes");
 const bodyParser = require("body-parser")
 
 const app = express();
@@ -20,8 +21,8 @@ app.use(express.static("uploads"))
 app.use(bodyParser.json());
 app.use(cors(
     {
-        origin : "*",
-        // origin: "http://localhost:5173", // Allow all origins
+        // origin : "*",
+        origin: "http://localhost:5173", // Allow all origins
         methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
         credentials: true,
         optionsSuccessStatus: 204 // For legacy browser support
@@ -44,6 +45,7 @@ app.use("/api/forget-password",otpRoutes);
 app.use("/api/profile",userRoutes);
 app.use("/api/admin",eventRoutes);
 app.use("/api/bet",betRoutes);
+app.use("/api/account",transitionsRoutes);
 
 
 app.get("/",(req,res)=>{

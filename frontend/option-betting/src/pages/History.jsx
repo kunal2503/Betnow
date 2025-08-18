@@ -1,63 +1,78 @@
-import React,{useState} from 'react'
-import { useEffect } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
-import { useUser } from '../context/UserProvider';
+import React, { useState, useEffect } from "react";
+import axiosInstance from "../../utils/axiosInstance";
+import { useUser } from "../context/UserProvider";
 
 const History = () => {
-     const {user} = useUser() ;
-    const [orders,setOrders] = useState([]);
-    console.log(user._id)
-  
-    const getOrersData = async () => {
-      try{
-        const response  = await axiosInstance.get(`/api/bet/get-bet-orders/${user._id}`);
-        setOrders(response.data.orders)
-      } catch(error){
-          console.log(error)
-        }
+  const { user } = useUser();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const getOrdersData = async () => {
+    if (!user?._id) return;
+    try {
+      const response = await axiosInstance.get(`/api/bet/bet-history/${user._id}`);
+
+      // Sort by createdAt descending (most recent first)
+      const sortedOrders = (response.data.orders || []).sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      setOrders(sortedOrders);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    useEffect(()=>{
-getOrersData()
-    },[])
-   return (
-      <div className="w-full flex flex-col items-center justify-center gap-4">
-        {orders
-          .filter((order) => order.status === "completed")
-          .map((order) => (
-            <div
-              key={order._id}
-              className="flex flex-col w-full max-w-lg px-4 py-3 gap-2 rounded-2xl items-center justify-center bg-white shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <p className="font-bold text-sm text-center text-gray-800">
-                {order.eventName}
-              </p>
-              <div className="flex  gap-4">
-                <div className="flex items-center justify-center flex-col">
-                  <p className="text-xs  text-gray-500">Bet Side</p>
-                  <p className="">{order.betSide.toUpperCase()}</p>
-                </div>
-                <div className="flex items-center justify-center flex-col">
-                  <p className="text-xs  text-gray-500">Result</p>
-                  <p className="">{order.result.toUpperCase()}</p>
-                </div>
-                <div className="flex items-center justify-center flex-col">
-                  <p className="text-xs  text-gray-500">Bet Amount</p>
-                  <p className="  ">{order.amount?.toFixed(2)}</p>
-                </div>
-                <div className="flex items-center justify-center flex-col">
-                  <p className="text-xs  text-gray-500">QTY</p>
-                  <p className="">{order.quantity}</p>
-                </div>
+  useEffect(() => {
+    getOrdersData();
+  }, [user?._id]);
+
+  if (loading) {
+    return <div className="flex justify-center py-10 text-gray-500">Loading...</div>;
+  }
+
+  if (orders.length === 0) {
+    return <div className="flex justify-center py-10 text-gray-500">History Not Found.</div>;
+  }
+
+  return (
+    <div className="w-full flex flex-col items-center gap-4 py-6">
+      {orders.map((order) => (
+        <div
+          key={order._id}
+          className="flex flex-col w-full max-w-lg px-4 py-3 gap-2 rounded-2xl items-center justify-center bg-white shadow-lg hover:shadow-xl transition-all duration-300"
+        >
+          <p className="font-bold text-sm text-center text-gray-800">{order.eventName}</p>
+          
+          <div className="flex gap-4">
+            {[
+              { label: "Bet Side", value: order.betSide?.toUpperCase() },
+              { label: "Type", value: order.type?.toUpperCase() },
+              { label: "Bet Amount", value: `₹${order.amount?.toFixed(2)}` },
+              { label: "QTY", value: order.quantity },
+            ].map(({ label, value }) => (
+              <div key={label} className="flex flex-col items-center">
+                <p className="text-xs text-gray-500">{label}</p>
+                <p>{value}</p>
               </div>
-              {order.status === "completed" ? (
-                <p className="text-green-600 font-bold">Completed</p>
-              ) : null}
-            </div>
-          ))}
-        
-      </div>
-    );
-}
+            ))}
+          </div>
 
-export default History
+          {/* Show status */}
+          {order.status === "completed" && (
+            <p className="text-green-600 font-bold">Completed</p>
+          )}
+
+          {/* Show order date */}
+          <p className="text-xs text-gray-400">
+            {new Date(order.createdAt).toLocaleString()}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default History;

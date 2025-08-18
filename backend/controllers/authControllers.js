@@ -47,7 +47,7 @@ exports.login = async (req,res) => {
         if(!passwordNotMatch){
             return res.status(400).json({message : "Invaild Credentials"});
         };
-        const token = await jwt.sign({id: userExists._id},"ontheway",{expiresIn : "1d"});
+        const token = await jwt.sign({id: userExists._id},process.env.JWT_SECRET,{expiresIn : "1d"});
         res.status(200).json({user : {id : userExists._id,username : userExists.username, email: userExists.email } , token })
     }catch(error){
         console.log(error)

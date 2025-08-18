@@ -27,7 +27,7 @@ const betsSchema =  new mongoose.Schema({
     quantity : {
         type: Number,
         required: true,
-        min: [1, "Quantity must be at least 1"]
+        default : 0
     },
     amount : {
         type : Number,
@@ -38,24 +38,25 @@ const betsSchema =  new mongoose.Schema({
         type : Number,
         required : true
     },
-    status: {
-      type: String,
-      default: "live",
-      enum: ["live", "completed", "cancelled"],
-      lowerCase : true
+    profitAndLoss : {
+        type :  Number,
+        default : 0
     },
     result : {
         type : String,
-        default : "in-progress",
-        enum : ["in-progress","yeswin","nowin","cancelled"],
+        default : "pending",
+        enum : ["pending","yeswin","nowin","cancelled"],
         lowerCase : true
     },
     createdAt : {
         type : Date,
         default : Date.now
     },
-
+    isActive : {
+        type : Boolean,
+        default : true
+    }
 },{timestamps : true});
 
 
-module.exports =  mongoose.model("bets", betsSchema);
+module.exports =  mongoose.model("bet", betsSchema);
