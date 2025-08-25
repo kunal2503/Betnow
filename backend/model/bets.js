@@ -32,7 +32,7 @@ const betsSchema =  new mongoose.Schema({
     amount : {
         type : Number,
         required :  true,
-        min: [1, "Amount must be at least 1"]
+        min: [0.5, "Amount must be at least 1"]
     },
     priceAtPlaceBet : {
         type : Number,
@@ -45,7 +45,7 @@ const betsSchema =  new mongoose.Schema({
     result : {
         type : String,
         default : "pending",
-        enum : ["pending","yeswin","nowin","cancelled"],
+        enum : ["pending","win","loss","cancelled"],
         lowerCase : true
     },
     createdAt : {

@@ -45,6 +45,7 @@ exports.addBalance = async (req, res) => {
   try {
     const { userId, balance } = req.body;
 
+    console.log(userId)
     if (!userId || !balance) {
       return res.status(400).json("user id and Balance required");
     }

@@ -1,32 +1,50 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import axiosInstance from "../../utils/axiosInstance";
+import { MdEmail, MdLock, MdError } from "react-icons/md";
 import toast from "react-hot-toast";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChanges = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!formData.email || !formData.password) {
-      return toast.error("Please fill all fields");
-    }
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
       const response = await axiosInstance.post("/api/auth/login", formData);
 
       localStorage.setItem("user", JSON.stringify(response?.data?.user));
-      localStorage.setItem("token", response?.data?.token); // No need to stringify token if it's a string
+      localStorage.setItem("token", response?.data?.token);
 
-      toast.success("Login successfully");
+      toast.success("Login successful");
       navigate("/");
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
@@ -36,63 +54,90 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center w-screen h-screen">
-      <div className="w-96 flex items-center h-96 flex-col gap-8 shadow-lg rounded-sm px-4 py-2">
-        <div className="text-center">
-          <h1 className="font-bold md:text-4xl text-2xl">Login</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-8 space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
+          <p className="text-gray-500">Please sign in to continue</p>
         </div>
-        <form
-          className="flex justify-between items-center flex-col gap-2 w-full"
-          onSubmit={handleSubmit}
-        >
-          <div className="flex flex-col gap-1 w-full">
-            <label htmlFor="email" className="font-light text-sm">
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <MdEmail className="text-gray-400" />
               Email
             </label>
             <input
               type="email"
-              required
-              onChange={handleChanges}
-              value={formData.email}
               id="email"
               name="email"
-              className="focus:outline-none px-8 py-2 border border-gray-700 rounded-sm"
+              value={formData.email}
+              onChange={handleChanges}
+              className={`mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Enter your email"
             />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                <MdError />
+                {errors.email}
+              </p>
+            )}
           </div>
-          <div className="flex flex-col gap-1 w-full">
-            <label htmlFor="password" className="font-light text-sm">
+
+          <div>
+            <label htmlFor="password" className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <MdLock className="text-gray-400" />
               Password
             </label>
             <input
               type="password"
-              required
-              onChange={handleChanges}
-              value={formData.password}
               id="password"
               name="password"
-              className="focus:outline-none px-8 py-2 border border-gray-700 rounded-sm"
+              value={formData.password}
+              onChange={handleChanges}
+              className={`mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 ${
+                errors.password ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Enter your password"
             />
-            <p className="self-end hover:text-blue-600 font-semibold">
-              <Link to={"/forget-password"}>Forget password</Link>
-            </p>
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                <MdError />
+                {errors.password}
+              </p>
+            )}
+            <Link 
+              to="/forget-password"
+              className="block text-right mt-2 text-sm text-cyan-600 hover:text-cyan-700 font-medium"
+            >
+              Forgot password?
+            </Link>
           </div>
+
           <button
+            type="submit"
             disabled={loading}
-            className={`bg-cyan-600 mt-2 hover:bg-cyan-700 px-8 py-2 rounded-lg font-bold ${
-              loading ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            className="w-full bg-cyan-600 text-white py-2 rounded-lg font-semibold hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin" />
+                <span>Signing in...</span>
+              </div>
+            ) : (
+              "Sign In"
+            )}
           </button>
         </form>
-        <div>
-          <p>
-            Not have account{" "}
-            <Link to={"/signup"} className="font-bold text-sm text-blue-600">
-              Signup
-            </Link>
-          </p>
-        </div>
+
+        <p className="text-center text-gray-600">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-cyan-600 hover:text-cyan-700 font-semibold">
+            Sign up
+          </Link>
+        </p>
       </div>
     </div>
   );

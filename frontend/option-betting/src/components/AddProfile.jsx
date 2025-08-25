@@ -1,14 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
+import { MdClose, MdCloudUpload, MdWarning } from "react-icons/md";
 import axiosInstance from "../../utils/axiosInstance";
-import { MdClose } from "react-icons/md";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
+import PropTypes from "prop-types";
 
 const AddProfile = ({ userId, setOpenEditPreview }) => {
   const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Image validation
+  const validateFile = (file) => {
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg'];
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return "Please upload a JPG or PNG image";
+    }
+    if (file.size > MAX_SIZE) {
+      return "Image size should be less than 5MB";
+    }
+    return null;
+  };
+
+  // Handle file selection
+  const handleFileChange = useCallback((e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    const error = validateFile(selectedFile);
+    if (error) {
+      setError(error);
+      setFile(null);
+      setPreview(null);
+      return;
+    }
+
+    setError("");
+    setFile(selectedFile);
+    const reader = new FileReader();
+    reader.onloadend = () => setPreview(reader.result);
+    reader.readAsDataURL(selectedFile);
+  }, []);
+
+  // Handle file upload
   const handleFileUpload = async (e) => {
     e.preventDefault();
 
@@ -17,8 +55,8 @@ const AddProfile = ({ userId, setOpenEditPreview }) => {
       return;
     }
 
-    setLoading(true);
     try {
+      setLoading(true);
       const formData = new FormData();
       formData.append("image", file);
 
@@ -34,9 +72,7 @@ const AddProfile = ({ userId, setOpenEditPreview }) => {
       setOpenEditPreview(false);
       navigate(`/profile/${userId}`);
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Error uploading profile picture"
-      );
+      toast.error(error.response?.data?.message || "Error uploading profile picture");
       console.error("Error uploading file:", error);
     } finally {
       setLoading(false);
@@ -44,59 +80,103 @@ const AddProfile = ({ userId, setOpenEditPreview }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-opacity-30 z-50">
-      <div className="bg-white rounded-2xl shadow-lg w-[90%] max-w-md p-6 flex flex-col gap-6">
-        {/* Close Button */}
-        <div className="flex justify-end ">
-          <MdClose onClick={() => setOpenEditPreview(false)} className="text-2xl cursor-pointer hover:text-red-500 transition "/>
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      onClick={(e) => e.target === e.currentTarget && setOpenEditPreview(false)}
+    >
+      <div className="bg-white rounded-2xl shadow-xl w-[90%] max-w-md p-6 animate-fadeIn">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-gray-800">
+            Update Profile Picture
+          </h2>
+          <button
+            onClick={() => setOpenEditPreview(false)}
+            className="p-1 text-gray-500 hover:text-red-500 transition-colors rounded-full hover:bg-gray-100"
+            aria-label="Close dialog"
+          >
+            <MdClose size={24} />
+          </button>
         </div>
 
-        {/* Title */}
-        <h1 className="text-xl font-semibold text-center">
-          Update Profile Picture
-        </h1>
-
         {/* Form */}
-        <form
-          className="flex flex-col gap-4 w-full"
-          onSubmit={handleFileUpload}
-          encType="multipart/form-data"
-        >
-          <div className="flex flex-col">
-            <label
-              className="text-sm font-light mb-1"
-              htmlFor="addImage"
-            >
-              Select Image
-            </label>
+        <form onSubmit={handleFileUpload} className="space-y-6">
+          {/* Upload Area */}
+          <div className="relative">
             <input
               type="file"
               id="addImage"
-              accept="image/*"
-              onChange={(e) => setFile(e.target.files[0])}
-              name="image"
-              className="border px-2 py-1 rounded-md text-sm w-full"
+              accept="image/png, image/jpeg, image/jpg"
+              onChange={handleFileChange}
+              className="hidden"
+              aria-label="Upload profile picture"
             />
-            {file && (
-              <span className="text-xs text-gray-500 mt-1">
-                Selected: {file.name}
-              </span>
+            <label
+              htmlFor="addImage"
+              className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer
+                ${error ? 'border-red-400 bg-red-50' : 'border-gray-300 hover:border-blue-500 bg-gray-50'}`}
+            >
+              {preview ? (
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              ) : (
+                <div className="flex flex-col items-center p-4 text-gray-500">
+                  <MdCloudUpload size={40} className="mb-2" />
+                  <p className="text-sm text-center">
+                    Click to upload or drag and drop<br />
+                    <span className="text-xs">PNG or JPG (max 5MB)</span>
+                  </p>
+                </div>
+              )}
+            </label>
+
+            {/* Error Message */}
+            {error && (
+              <div className="flex items-center gap-2 mt-2 text-red-500 text-sm">
+                <MdWarning />
+                <span>{error}</span>
+              </div>
             )}
           </div>
 
+          {/* Selected File Name */}
+          {file && !error && (
+            <div className="text-sm text-gray-500 flex items-center gap-2">
+              <span>Selected:</span>
+              <span className="font-medium truncate">{file.name}</span>
+            </div>
+          )}
+
+           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading}
-            className={`bg-blue-600 text-white px-4 py-2 rounded-md transition hover:bg-blue-700 ${
-              loading ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            disabled={loading || !file || error}
+            className="w-full py-2.5 px-4 bg-blue-600 text-white rounded-lg font-medium
+                     hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                     disabled:opacity-50 disabled:cursor-not-allowed transition-all
+                     flex items-center justify-center gap-2"
           >
-            {loading ? "Uploading..." : "Save"}
+            {loading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              'Save Changes'
+            )}
           </button>
         </form>
       </div>
     </div>
   );
+};
+
+AddProfile.propTypes = {
+  userId: PropTypes.string.isRequired,
+  setOpenEditPreview: PropTypes.func.isRequired,
 };
 
 export default AddProfile;

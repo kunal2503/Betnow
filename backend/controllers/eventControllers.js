@@ -75,8 +75,8 @@ exports.declareResult = async(req,res) =>{
         const resultSide = req.body.result;
         const eventId = req.params.eventId;
         const event = await Event.findOne({_id : eventId});
-        if(!event){
-            return res.status(400).json({message : "Plase enter valid event Id"});
+        if(!event || event.status !== "live"){
+            return res.status(400).json({message : "Event not exist or event closed"});
         }
         const betData =  await bets.find({eventId : event._id});
         if(!betData) {
@@ -86,7 +86,8 @@ exports.declareResult = async(req,res) =>{
             await refundPaymentsSettlement(betData)
             event.status = "cancelled";
         }
-        await winnersPayments(resultSide,betData);
+        await winnersPayments(resultSide,betData,event);
+        event.status = "completed";
         
         await event.save();
         return res.status(200).json({message : "Payment setteled"});

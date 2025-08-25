@@ -45,7 +45,7 @@ const betsSchemaHistory =  new mongoose.Schema({
     result : {
         type : String,
         default : "in-progress",
-        enum : ["in-progress","yeswin","nowin","cancelled"],
+        enum : ["in-progress","win","loss","cancelled"],
         lowerCase : true
     },
     closeAt : {
@@ -54,7 +54,7 @@ const betsSchemaHistory =  new mongoose.Schema({
     },
     type:{
         type : String,
-        enum : ["sell","buy"],
+        enum : ["sell","buy","result"],
         required: true
     }
 

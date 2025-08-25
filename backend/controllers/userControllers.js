@@ -8,6 +8,7 @@ exports.getUserInfo = async (req, res)  =>{
             return res.status(400).json({message : "Id is Required" });
         }
         const userExist = await User.findOne({_id : id}).select("-password");
+        console.log(id,userExist)
         if(!userExist){
             return res.status(404).json({message : "User not Found"});
         }
